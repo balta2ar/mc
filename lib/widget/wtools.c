@@ -93,7 +93,7 @@ query_default_callback (Widget * w, Widget * sender, widget_msg_t msg, int parm,
             }
 
             /* if previous dialog is not fullscreen'd -- overlap it */
-            if (prev_dlg == NULL || prev_dlg->fullscreen)
+            if (prev_dlg == NULL || (prev_dlg->flags & DLG_FULLSCREEN) != 0)
                 ypos = LINES / 3 - (w->lines - 3) / 2;
             else
                 ypos = WIDGET (prev_dlg)->y + 2;

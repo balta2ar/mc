@@ -1758,7 +1758,7 @@ do_nc (void)
 #endif
 
     midnight_dlg = dlg_create (FALSE, 0, 0, LINES, COLS, dialog_colors, midnight_callback, NULL,
-                               "[main]", NULL, DLG_NONE);
+                               "[main]", NULL, DLG_FULLSCREEN);
 
     /* Check if we were invoked as an editor or file viewer */
     if (mc_global.mc_run_mode != MC_RUN_FULL)

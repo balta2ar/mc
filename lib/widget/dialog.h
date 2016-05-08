@@ -33,10 +33,12 @@
 typedef enum
 {
     DLG_NONE = 0,               /* No options */
-    DLG_CENTER = (1 << 0),      /* Center the dialog */
-    DLG_TRYUP = (1 << 1),       /* Try to move two lines up the dialog */
-    DLG_COMPACT = (1 << 2)      /* Suppress spaces around the frame */
+    DLG_FULLSCREEN = (1 << 0),  /* Dialog is screen (and thus fullscreen) */
+    DLG_CENTER = (1 << 1),      /* Center the dialog */
+    DLG_TRYUP = (1 << 2),       /* Try to move two lines up the dialog */
+    DLG_COMPACT = (1 << 3)      /* Suppress spaces around the frame */
 } dlg_flags_t;
+/* if DLG_FULLSCREEN is set then DLG_CENTER and DLG_TRYUP are ignored */
 
 /* Dialog color constants */
 typedef enum
@@ -79,7 +81,6 @@ struct WDialog
     int ret_value;              /* Result of dlg_run() */
 
     /* Internal flags */
-    gboolean fullscreen;        /* Parents dialogs don't need refresh */
     gboolean winch_pending;     /* SIGWINCH signal has been got. Resize dialog after rise */
     int mouse_status;           /* For the autorepeat status of the mouse */
 

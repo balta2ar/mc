@@ -388,8 +388,9 @@ dlg_mouse_event (WDialog * h, Gpm_Event * event)
     GList *p;
 
     /* close the dialog by mouse left click out of dialog area */
-    if (mouse_close_dialog && !h->fullscreen && ((event->buttons & GPM_B_LEFT) != 0)
-        && ((event->type & GPM_DOWN) != 0) && !mouse_global_in_widget (event, wh))
+    if (mouse_close_dialog && (h->flags & DLG_FULLSCREEN) == 0
+        && ((event->buttons & GPM_B_LEFT) != 0) && ((event->type & GPM_DOWN) != 0)
+        && !mouse_global_in_widget (event, wh))
     {
         h->ret_value = B_CANCEL;
         dlg_stop (h);
@@ -755,21 +756,35 @@ dlg_set_position (WDialog * h, int y1, int x1, int y2, int x2)
 void
 dlg_set_size (WDialog * h, int lines, int cols)
 {
-    int x = WIDGET (h)->x;
-    int y = WIDGET (h)->y;
+    int x, y;
 
-    if ((h->flags & DLG_CENTER) != 0)
+    if ((h->flags & DLG_FULLSCREEN) != 0)
     {
-        y = (LINES - lines) / 2;
-        x = (COLS - cols) / 2;
+        y = 0;
+        x = 0;
+        lines = LINES;
+        cols = COLS;
     }
-
-    if ((h->flags & DLG_TRYUP) != 0)
+    else
     {
-        if (y > 3)
-            y -= 2;
-        else if (y == 3)
-            y = 2;
+        if ((h->flags & DLG_CENTER) != 0)
+        {
+            y = (LINES - lines) / 2;
+            x = (COLS - cols) / 2;
+        }
+        else
+        {
+            y = WIDGET (h)->y;
+            x = WIDGET (h)->x;
+        }
+
+        if ((h->flags & DLG_TRYUP) != 0)
+        {
+            if (y > 3)
+                y -= 2;
+            else if (y == 3)
+                y = 2;
+        }
     }
 
     dlg_set_position (h, y, x, y + lines, x + cols);
@@ -828,6 +843,15 @@ dlg_create (gboolean modal, int y1, int x1, int lines, int cols,
     WDialog *new_d;
     Widget *w;
 
+    if ((flags & DLG_FULLSCREEN) != 0)
+    {
+        y1 = 0;
+        x1 = 0;
+        lines = LINES;
+        cols = COLS;
+        flags &= ~(DLG_CENTER | DLG_TRYUP);
+    }
+
     new_d = g_new0 (WDialog, 1);
     w = WIDGET (new_d);
     widget_init (w, y1, x1, lines, cols, (callback != NULL) ? callback : dlg_default_callback,
@@ -844,7 +868,6 @@ dlg_create (gboolean modal, int y1, int x1, int lines, int cols,
     new_d->data = NULL;
 
     dlg_set_size (new_d, lines, cols);
-    new_d->fullscreen = (w->x == 0 && w->y == 0 && w->cols == COLS && w->lines == LINES);
 
     new_d->mouse_status = MOU_UNHANDLED;
 
@@ -1029,7 +1052,7 @@ do_refresh (void)
     {
         /* Search first fullscreen dialog */
         for (; d != NULL; d = g_list_next (d))
-            if (d->data != NULL && DIALOG (d->data)->fullscreen)
+            if (d->data != NULL && (DIALOG (d->data)->flags & DLG_FULLSCREEN) != 0)
                 break;
         /* back to top dialog */
         for (; d != NULL; d = g_list_previous (d))
