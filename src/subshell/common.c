@@ -1283,6 +1283,8 @@ do_subshell_chdir (const vfs_path_t * vpath, gboolean update_prompt)
         g_free (pcwd);
         return;
     }
+    // turn on paste mode
+    write_all (mc_global.tty.subshell_pty, "\x1B\x5B\x32\x30\x30\x7E", 6);
 
     /* The initial space keeps this out of the command history (in bash
        because we set "HISTCONTROL=ignorespace") */
@@ -1310,6 +1312,10 @@ do_subshell_chdir (const vfs_path_t * vpath, gboolean update_prompt)
     {
         write_all (mc_global.tty.subshell_pty, "/", 1);
     }
+
+    // turn off paste mode
+    write_all (mc_global.tty.subshell_pty, "\x1B\x5B\x32\x30\x31\x7E", 6);
+
     write_all (mc_global.tty.subshell_pty, "\n", 1);
 
     subshell_state = RUNNING_COMMAND;
